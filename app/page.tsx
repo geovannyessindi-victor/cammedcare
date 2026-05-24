@@ -1,37 +1,112 @@
-export default function Page() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-black px-6 text-neutral-400">
-      <div className="flex w-full max-w-md flex-col items-start gap-8">
-        <svg
-          fill="currentColor"
-          viewBox="0 0 147 70"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-          className="size-10 text-white"
-        >
-          <path d="M56 50.2031V14H70V60.1562C70 65.5928 65.5928 70 60.1562 70C57.5605 70 54.9982 68.9992 53.1562 67.1573L0 14H19.7969L56 50.2031Z" />
-          <path d="M147 56H133V23.9531L100.953 56H133V70H96.6875C85.8144 70 77 61.1856 77 50.3125V14H91V46.1562L123.156 14H91V0H127.312C138.186 0 147 8.81439 147 19.6875V56Z" />
-        </svg>
+'use client'
 
-        <div className="space-y-3">
-          <h1 className="text-balance text-2xl font-semibold tracking-tight text-white">
-            To get started, describe what you want to build.
-          </h1>
-          <p className="text-pretty text-sm leading-relaxed text-neutral-500">
-            This is the default page for a fresh v0 project. Open the prompt and
-            tell v0 what to create, or browse the{' '}
-            <a
-              href="https://v0.app/templates"
-              target="_blank"
-              rel="noreferrer"
-              className="text-neutral-300 underline underline-offset-4 hover:text-white"
-            >
-              Community
-            </a>{' '}
-            for inspiration.
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/app/context/auth-context'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import Link from 'next/link'
+import { Stethoscope, Users } from 'lucide-react'
+
+export default function Page() {
+  const router = useRouter()
+  const { session, loading } = useAuth()
+
+  useEffect(() => {
+    if (!loading && session) {
+      router.push('/dashboard')
+    }
+  }, [session, loading, router])
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
+  }
+
+  if (session) {
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">CamMedCare</h1>
+          <p className="text-xl text-gray-600">
+            Connect with healthcare professionals online
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          {/* Doctor Signup */}
+          <Card className="border-2 border-blue-200 shadow-lg hover:shadow-xl transition">
+            <CardHeader className="text-center">
+              <Stethoscope className="w-12 h-12 mx-auto mb-4 text-blue-600" />
+              <CardTitle>I&apos;m a Doctor</CardTitle>
+              <CardDescription>
+                Provide consultations and manage patients
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Join our network of healthcare professionals to help patients remotely.
+              </p>
+              <div className="space-y-2">
+                <Link href="/signup?type=doctor" className="block">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                    Sign Up as Doctor
+                  </Button>
+                </Link>
+                <Link href="/login?type=doctor" className="block">
+                  <Button variant="outline" className="w-full">
+                    Login
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Patient Signup */}
+          <Card className="border-2 border-green-200 shadow-lg hover:shadow-xl transition">
+            <CardHeader className="text-center">
+              <Users className="w-12 h-12 mx-auto mb-4 text-green-600" />
+              <CardTitle>I&apos;m a Patient</CardTitle>
+              <CardDescription>
+                Get medical advice from licensed professionals
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Book consultations and manage your medical records securely.
+              </p>
+              <div className="space-y-2">
+                <Link href="/signup?type=patient" className="block">
+                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                    Sign Up as Patient
+                  </Button>
+                </Link>
+                <Link href="/login?type=patient" className="block">
+                  <Button variant="outline" className="w-full">
+                    Login
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="text-center text-sm text-gray-600">
+          <p>
+            By using CamMedCare, you agree to our{' '}
+            <Link href="#" className="text-blue-600 hover:underline">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="#" className="text-blue-600 hover:underline">
+              Privacy Policy
+            </Link>
           </p>
         </div>
       </div>
-    </main>
+    </div>
   )
 }
