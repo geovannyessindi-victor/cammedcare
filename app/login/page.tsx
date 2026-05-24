@@ -13,7 +13,6 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const userType = (searchParams.get('type') || 'patient') as 'patient' | 'doctor'
-
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
