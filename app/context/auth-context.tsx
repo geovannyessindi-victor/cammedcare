@@ -1,6 +1,5 @@
 'use client'
-
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { User } from '@/lib/types'
 import type { Session } from '@supabase/supabase-js'
@@ -22,41 +21,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
+  const loadUserProfile = useCallback(async (sessionUser: any) => {
+    if (!sessionUser) return
+    try {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', sessionUser.id)
+        .single()
+
+      if (profile) {
+        setUser(profile)
+        if (profile.user_type === 'doctor') {
+          const { data: doctorProfile } = await supabase
+            .from('doctor_profiles')
+            .select('*')
+            .eq('user_id', sessionUser.id)
+            .single()
+          setUserProfile(doctorProfile)
+        } else if (profile.user_type === 'patient') {
+          const { data: patientProfile } = await supabase
+            .from('patient_profiles')
+            .select('*')
+            .eq('user_id', sessionUser.id)
+            .single()
+          setUserProfile(patientProfile)
+        }
+      } else {
+        // Profil pas encore dans public.users, utilise les métadonnées
+        setUser({
+          id: sessionUser.id,
+          email: sessionUser.email,
+          full_name: sessionUser.user_metadata?.full_name || '',
+          user_type: sessionUser.user_metadata?.user_type || 'patient',
+        } as User)
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error)
+    }
+  }, [supabase])
+
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Get session
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
+        const { data: { session } } = await supabase.auth.getSession()
         setSession(session)
-
         if (session?.user) {
-          // Fetch user profile from database
-          const { data: userProfile } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-
-          setUser(userProfile)
-
-          // Fetch role-specific profile
-          if (userProfile?.user_type === 'doctor') {
-            const { data: doctorProfile } = await supabase
-              .from('doctor_profiles')
-              .select('*')
-              .eq('user_id', session.user.id)
-              .single()
-            setUserProfile(doctorProfile)
-          } else if (userProfile?.user_type === 'patient') {
-            const { data: patientProfile } = await supabase
-              .from('patient_profiles')
-              .select('*')
-              .eq('user_id', session.user.id)
-              .single()
-            setUserProfile(patientProfile)
-          }
+          await loadUserProfile(session.user)
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
@@ -67,21 +78,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth()
 
-    // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session)
-      if (!session) {
+      if (session?.user) {
+        await loadUserProfile(session.user)
+      } else {
         setUser(null)
         setUserProfile(null)
       }
     })
 
-    return () => {
-      subscription?.unsubscribe()
-    }
-  }, [supabase])
+    return () => { subscription?.unsubscribe() }
+  }, [supabase, loadUserProfile])
 
   const signOut = async () => {
     await supabase.auth.signOut()
