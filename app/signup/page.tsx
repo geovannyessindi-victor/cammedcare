@@ -43,7 +43,7 @@ function SignupForm() {
       if (result.error) {
         setError(result.error)
       } else {
-        router.push('/login?type=' + userType)
+        router.push('/dashboard')
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
