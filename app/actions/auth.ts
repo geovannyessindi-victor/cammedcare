@@ -1,12 +1,10 @@
 'use server'
-
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 async function getSupabaseClient() {
   const cookieStore = await cookies()
-
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -21,9 +19,7 @@ async function getSupabaseClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // ignored in Server Components
           }
         },
       },
@@ -39,10 +35,15 @@ export async function signUpAction(
 ) {
   const supabase = await getSupabaseClient()
 
-  // Sign up with Supabase Auth
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        full_name: fullName,
+        user_type: userType,
+      }
+    }
   })
 
   if (authError) {
@@ -53,7 +54,6 @@ export async function signUpAction(
     return { error: 'Failed to create user' }
   }
 
-  // Create user profile in our users table
   const { error: userError } = await supabase.from('users').insert({
     id: authData.user.id,
     email,
@@ -65,7 +65,6 @@ export async function signUpAction(
     return { error: userError.message }
   }
 
-  // Create role-specific profile
   if (userType === 'doctor') {
     const { error: doctorError } = await supabase
       .from('doctor_profiles')
@@ -74,7 +73,6 @@ export async function signUpAction(
         specialization: '',
         license_number: '',
       })
-
     if (doctorError) {
       return { error: doctorError.message }
     }
@@ -84,7 +82,6 @@ export async function signUpAction(
       .insert({
         user_id: authData.user.id,
       })
-
     if (patientError) {
       return { error: patientError.message }
     }
@@ -95,57 +92,44 @@ export async function signUpAction(
 
 export async function signInAction(email: string, password: string) {
   const supabase = await getSupabaseClient()
-
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
-
   if (error) {
     return { error: error.message }
   }
-
   return { success: true, user: data.user }
 }
 
 export async function signOutAction() {
   const supabase = await getSupabaseClient()
-
   await supabase.auth.signOut()
-
   redirect('/login')
 }
 
 export async function getSessionAction() {
   const supabase = await getSupabaseClient()
-
   const { data, error } = await supabase.auth.getSession()
-
   if (error) {
     return { error: error.message }
   }
-
   return { session: data.session }
 }
 
 export async function getCurrentUserAction() {
   const supabase = await getSupabaseClient()
-
   const { data: authData, error: authError } = await supabase.auth.getUser()
-
   if (authError || !authData.user) {
     return { error: 'Not authenticated' }
   }
-
   const { data: userData, error: userError } = await supabase
     .from('users')
     .select('*')
     .eq('id', authData.user.id)
     .single()
-
   if (userError) {
     return { error: userError.message }
   }
-
   return { user: userData }
 }
