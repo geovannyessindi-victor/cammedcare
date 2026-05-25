@@ -56,7 +56,6 @@ export default function DashboardPage() {
       {/* Header */}
       <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg, #2563eb, #0d9488)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🏥</div>
             <div>
@@ -72,7 +71,6 @@ export default function DashboardPage() {
                 <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, background: '#ef4444', borderRadius: '50%', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700 }}>3</span>
               </button>
             </Link>
-
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 10, background: '#f1f5f9', border: '1px solid #e2e8f0' }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #2563eb, #0d9488)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 12 }}>{initials}</div>
               <div>
@@ -80,7 +78,6 @@ export default function DashboardPage() {
                 <p style={{ color: '#64748b', fontSize: 11, margin: 0 }}>{user?.user_type === 'doctor' ? 'Médecin' : 'Patient'}</p>
               </div>
             </div>
-
             <button onClick={handleSignOut} style={{ padding: '8px 16px', borderRadius: 8, background: '#fff', border: '1px solid #e2e8f0', color: '#64748b', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
               Déconnexion
             </button>
@@ -102,7 +99,7 @@ export default function DashboardPage() {
                 : 'Accédez à vos services médicaux en ligne.'}
             </p>
           </div>
-          <div style={{ fontSize: 80, filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))' }}>
+          <div style={{ fontSize: 80, filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))', animation: 'float0 3s ease-in-out infinite' }}>
             {user?.user_type === 'doctor' ? '👨‍⚕️' : '🏥'}
           </div>
         </div>
@@ -112,12 +109,13 @@ export default function DashboardPage() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
         <h3 style={{ color: '#64748b', fontSize: 12, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', margin: '0 0 20px' }}>Services disponibles</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
-          {cards.map((card) => (
+          {cards.map((card, index) => (
             <Link key={card.href} href={card.href} style={{ textDecoration: 'none' }}>
               <div
-                style={{ borderRadius: 16, padding: 24, background: card.bg, border: `1px solid ${card.border}`, cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)' }}
+                className={`card-float-${index}`}
+                style={{ borderRadius: 16, padding: 24, background: card.bg, border: `1px solid ${card.border}`, cursor: 'pointer', transition: 'box-shadow 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 25px rgba(0,0,0,0.12)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)' }}
               >
                 <div style={{ fontSize: 32, marginBottom: 14 }}>{card.icon}</div>
                 <h3 style={{ color: '#1e293b', fontSize: 16, fontWeight: 700, margin: '0 0 4px' }}>{card.title}</h3>
@@ -130,7 +128,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .card-float-0 { animation: float 3s ease-in-out infinite; }
+        .card-float-1 { animation: float 3s ease-in-out infinite 0.5s; }
+        .card-float-2 { animation: float 3s ease-in-out infinite 1s; }
+        .card-float-3 { animation: float 3s ease-in-out infinite 1.5s; }
+      `}</style>
     </div>
   )
 }
