@@ -35,7 +35,7 @@ export default function HomePage() {
         </nav>
 
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link href="/login>
+          <Link href="/login">
             <button style={{ padding: '8px 20px', borderRadius: 20, border: '1px solid #e5e7eb', background: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', color: '#111' }}>
               Connexion
             </button>
