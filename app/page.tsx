@@ -21,7 +21,9 @@ export default function HomePage() {
 
   const handleSearch = () => {
     if (search.trim()) {
-      window.open(`https://www.google.com/search?q=médecin+${encodeURIComponent(search)}+Cameroun`, '_blank')
+      router.push(`/patient/doctors?search=${encodeURIComponent(search)}`)
+    } else {
+      router.push('/patient/doctors')
     }
   }
 
@@ -91,7 +93,7 @@ export default function HomePage() {
             {['Généraliste', 'Pédiatrie', 'Cardiologie', 'Dermatologie', 'Urgences'].map(tag => (
               <span
                 key={tag}
-                onClick={() => { setSearch(tag); window.open(`https://www.google.com/search?q=médecin+${encodeURIComponent(tag)}+Cameroun`, '_blank') }}
+                onClick={() => { setSearch(tag); router.push(`/patient/doctors?search=${encodeURIComponent(tag)}`) }}
                 style={{ padding: '5px 16px', borderRadius: 20, border: '1px solid #e5e7eb', fontSize: 13, color: '#374151', background: '#fff', cursor: 'pointer' }}
               >{tag}</span>
             ))}
