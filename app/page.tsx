@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/context/auth-context'
 import Link from 'next/link'
@@ -8,6 +8,7 @@ import Link from 'next/link'
 export default function HomePage() {
   const router = useRouter()
   const { session, loading } = useAuth()
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     if (!loading && session) {
@@ -17,6 +18,12 @@ export default function HomePage() {
 
   if (loading) return null
   if (session) return null
+
+  const handleSearch = () => {
+    if (search.trim()) {
+      window.open(`https://www.google.com/search?q=médecin+${encodeURIComponent(search)}+Cameroun`, '_blank')
+    }
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
@@ -66,14 +73,27 @@ export default function HomePage() {
           {/* Search */}
           <div style={{ display: 'flex', alignItems: 'center', maxWidth: 560, margin: '0 auto 24px', background: '#fff', borderRadius: 40, border: '1px solid #e5e7eb', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', padding: '6px 6px 6px 20px' }}>
             <span style={{ fontSize: 16, marginRight: 8 }}>🔍</span>
-            <input placeholder="Rechercher un médecin, spécialité..." style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, color: '#111', background: 'transparent' }} />
-            <button style={{ padding: '10px 24px', borderRadius: 30, background: '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Rechercher</button>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              placeholder="Rechercher un médecin, spécialité..."
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, color: '#111', background: 'transparent' }}
+            />
+            <button
+              onClick={handleSearch}
+              style={{ padding: '10px 24px', borderRadius: 30, background: '#2563eb', border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+            >Rechercher</button>
           </div>
 
           {/* Tags */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             {['Généraliste', 'Pédiatrie', 'Cardiologie', 'Dermatologie', 'Urgences'].map(tag => (
-              <span key={tag} style={{ padding: '5px 16px', borderRadius: 20, border: '1px solid #e5e7eb', fontSize: 13, color: '#374151', background: '#fff', cursor: 'pointer' }}>{tag}</span>
+              <span
+                key={tag}
+                onClick={() => { setSearch(tag); window.open(`https://www.google.com/search?q=médecin+${encodeURIComponent(tag)}+Cameroun`, '_blank') }}
+                style={{ padding: '5px 16px', borderRadius: 20, border: '1px solid #e5e7eb', fontSize: 13, color: '#374151', background: '#fff', cursor: 'pointer' }}
+              >{tag}</span>
             ))}
           </div>
         </div>
