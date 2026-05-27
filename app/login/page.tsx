@@ -35,8 +35,7 @@ function LoginForm() {
       if (result.error) {
         setError(result.error)
       } else {
-        router.refresh()
-router.push('/dashboard')
+        window.location.href = '/dashboard'
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
